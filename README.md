@@ -160,6 +160,7 @@ Client requirements vs technical implementation
 Built for a local bus company to address passenger pickup coordination challenges. The project successfully demonstrated technical feasibility, though the company opted not to proceed with implementation due to business timing and operational priorities rather than technical limitations.
 📝 License
 This is a portfolio project. Code provided as-is for demonstration purposes.
+
 👤 Author
 Ali Tehrani
 
