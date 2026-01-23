@@ -161,11 +161,10 @@ Built for a local bus company to address passenger pickup coordination challenge
 📝 License
 This is a portfolio project. Code provided as-is for demonstration purposes.
 👤 Author
-[Your Name]
+Ali Tehrani
 
 GitHub: [@alitehranz]
-LinkedIn: [Your LinkedIn]
-Portfolio: [your-site.com]
+
 
 
 Built in 1 week | Modern Python | Production-ready code structure | Real-world problem solving
