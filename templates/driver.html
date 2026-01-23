@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Driver Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css" />
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <span class="bus-icon">🚌</span>
+            <span class="app-title">Driver Dashboard</span>
+        </div>
+
+        <h1>Pickup Requests</h1>
+        <p id="lastUpdated">Last updated: never</p>
+
+        <table id="requestsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="requestsBody">
+                <!-- Filled by JavaScript -->
+            </tbody>
+        </table>
+
+        <p id="emptyMessage" style="display:none;">No active requests.</p>
+    </div>
+
+    <script>
+        const bodyEl = document.getElementById("requestsBody");
+        const emptyMsg = document.getElementById("emptyMessage");
+        const lastUpdatedEl = document.getElementById("lastUpdated");
+
+        async function completeRequest(pingId) {
+            const formData = new FormData();
+            formData.append("ping_id", pingId);
+
+            await fetch("/api/complete", {
+                method: "POST",
+                body: formData,
+            });
+
+            fetchRequests(); // refresh list
+        }
+
+        function updateTable(requests) {
+            bodyEl.innerHTML = "";
+
+            if (!requests.length) {
+                emptyMsg.style.display = "block";
+            } else {
+                emptyMsg.style.display = "none";
+            }
+
+            // (Optional) newest first
+            requests.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            requests.forEach((req) => {
+                const tr = document.createElement("tr");
+
+                const nameTd = document.createElement("td");
+                nameTd.textContent = req.name;
+                tr.appendChild(nameTd);
+
+                const timeTd = document.createElement("td");
+                const date = new Date(req.created_at);
+                timeTd.textContent = date.toLocaleTimeString();
+                tr.appendChild(timeTd);
+
+                const actionsTd = document.createElement("td");
+
+                // Open in Apple Maps with lat/lon
+                const mapsLink = document.createElement("a");
+                mapsLink.textContent = "Open in Apple Maps";
+                mapsLink.href = `https://maps.apple.com/?ll=${req.latitude},${req.longitude}`;
+                mapsLink.target = "_blank";
+                actionsTd.appendChild(mapsLink);
+
+                actionsTd.appendChild(document.createTextNode(" | "));
+
+                // Complete button
+                const completeBtn = document.createElement("button");
+                completeBtn.textContent = "Complete";
+                completeBtn.onclick = () => completeRequest(req.id);
+                actionsTd.appendChild(completeBtn);
+
+                tr.appendChild(actionsTd);
+                bodyEl.appendChild(tr);
+            });
+        }
+
+        async function fetchRequests() {
+            try {
+                const response = await fetch("/api/requests");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const requests = await response.json();
+                updateTable(requests);
+                lastUpdatedEl.textContent =
+                    "Last updated: " + new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error("Failed to fetch requests:", error);
+                lastUpdatedEl.textContent = "Failed to update.";
+            }
+        }
+
+        // Initial Load
+        fetchRequests();
+        // Update every 5 seconds
+        setInterval(fetchRequests, 5000);
+    </script>
+</body>
+</html>

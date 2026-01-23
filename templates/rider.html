@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Request Pickup</title>
+    <link rel="stylesheet" href="/static/style.css" />
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <span class="bus-icon">🚌</span>
+            <span class="app-title">Bus Pickup</span>
+        </div>
+
+        <h1>Request Pickup</h1>
+        <p class="subtitle">Share your location so the driver can find you.</p>
+
+        <label for="name">Your name or booking ID:</label>
+        <input type="text" id="name" placeholder="Your Name! / Booking #123" />
+
+        <button id="sendBtn">Share My Location</button>
+
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const sendBtn = document.getElementById("sendBtn");
+        const statusEl = document.getElementById("status");
+
+        function setStatus(msg) {
+            statusEl.textContent = msg;
+        }
+
+        sendBtn.onclick = () => {
+            const name = document.getElementById("name").value.trim();
+            if (!name) {
+                setStatus("Please enter your name or booking ID.");
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                setStatus("Geolocation is not supported on this device.");
+                return;
+            }
+
+            setStatus("Getting your location...");
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+
+                    setStatus("Sending your request...");
+
+                    fetch("/api/ping", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            name: name,
+                            latitude: lat,
+                            longitude: lon,
+                        }),
+                    })
+                        .then((res) => res.json())
+                        .then((data) => {
+                            if (data.status === "ok") {
+                                setStatus("Pickup request sent! 🚍");
+                            } else {
+                                setStatus("Something went wrong.");
+                            }
+                        })
+                        .catch(() => {
+                            setStatus("Network error. Please try again.");
+                        });
+                },
+                (err) => {
+                    console.error(err);
+                    setStatus("Unable to get your location. Please check permissions.");
+                }
+            );
+        };
+    </script>
+</body>
+</html>
+
+
