@@ -164,7 +164,7 @@ This is a portfolio project. Code provided as-is for demonstration purposes.
 👤 Author
 Ali Tehrani
 
-GitHub: [@alitehranz]
+GitHub: [@alitehranwi]
 
 
 
